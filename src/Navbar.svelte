@@ -1,8 +1,42 @@
 <script>
+  import { afterUpdate, onMount } from "svelte";
+  import firebase from "firebase/app";
+
+  export let userStatus;
+
+  let welcomeMessage = "";
+  let btnLoginText = "Login";
+
   function showFormLogin() {
-    let form = document.getElementById("login-form");
-    form.hidden = !form.hidden;
+    if (userStatus === true) {
+      firebase.auth().signOut();
+    } else {
+      let form = document.getElementById("login-form");
+      form.hidden = !form.hidden;
+    }
   }
+
+  function toggelUserStatus() {
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        userStatus = true;
+        btnLoginText = "Sign out";
+        welcomeMessage = "Welcome, " + user.email.split("@")[0];
+      } else {
+        userStatus = false;
+        btnLoginText = "Login";
+        welcomeMessage = "";
+      }
+    });
+  }
+
+  onMount(() => {
+    toggelUserStatus();
+  });
+
+  afterUpdate(() => {
+    toggelUserStatus();
+  });
 </script>
 
 <style>
@@ -26,8 +60,11 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" on:click={showFormLogin}>Login</a>
+        <span id="login" class="nav-link" on:click={showFormLogin}>
+          {btnLoginText}
+        </span>
       </li>
     </ul>
   </div>
+  <span class="navbar-text font-italic">{welcomeMessage}</span>
 </nav>

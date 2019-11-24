@@ -1,22 +1,11 @@
 <script>
   import firebase from "firebase/app";
   import "firebase/auth";
-  import "firebase/firestore";
+  import { createEventDispatcher } from "svelte";
 
-  // Your web app's Firebase configuration
-  var firebaseConfig = {
-    apiKey: "AIzaSyAkqih8CUzxCkrU-wTpO14pe93K2J1lzlc",
-    authDomain: "padpad-svelte.firebaseapp.com",
-    databaseURL: "https://padpad-svelte.firebaseio.com",
-    projectId: "padpad-svelte",
-    storageBucket: "padpad-svelte.appspot.com",
-    messagingSenderId: "538031802538",
-    appId: "1:538031802538:web:874d5965ab1b4acfe268d3",
-    measurementId: "G-057P96DG8M"
-  };
-  // Initialize Firebase
-  let fb = firebase.initializeApp(firebaseConfig);
+  const dispatch = createEventDispatcher();
 
+  export let fb;
   function showFormLogin() {
     let form = document.getElementById("login-form");
     form.hidden = !form.hidden;
@@ -28,11 +17,17 @@
 
     fb.auth()
       .signInWithEmailAndPassword(email, password)
+      .then(u => {
+        var user = firebase.auth().currentUser;
+        dispatch("userStatus", { user: true });
+        showFormLogin();
+      })
       .catch(function(error) {
         // Handle Errors here.
         var errorCode = error.code;
         var errorMessage = error.message;
         // [START_EXCLUDE]
+        dispatch("userStatus", { user: false });
         if (errorCode === "auth/wrong-password") {
           alert("Wrong password.");
         } else {
@@ -63,23 +58,6 @@
         // [END_EXCLUDE]
       });
   }
-
-  fb.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      console.log(user);
-      // User is signed in.
-      var displayName = user.displayName;
-      var email = user.email;
-      var emailVerified = user.emailVerified;
-      var photoURL = user.photoURL;
-      var isAnonymous = user.isAnonymous;
-      var uid = user.uid;
-      var providerData = user.providerData;
-    } else {
-      // User is signed out.
-      console.log("User is signed out.");
-    }
-  });
 </script>
 
 <style>
