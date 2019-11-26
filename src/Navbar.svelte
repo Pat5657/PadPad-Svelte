@@ -1,15 +1,14 @@
 <script>
   import { afterUpdate, onMount } from "svelte";
-  import firebase from "firebase/app";
+  import { auth } from "./firebase.js";
+  import { fly } from "svelte/transition";
 
-  export let userStatus;
-
+  let userStatus;
   let welcomeMessage = "";
-  let btnLoginText = "Login";
 
-  function showFormLogin() {
+  function toggleSignIn() {
     if (userStatus === true) {
-      firebase.auth().signOut();
+      auth.signOut();
     } else {
       let form = document.getElementById("login-form");
       form.hidden = !form.hidden;
@@ -17,15 +16,12 @@
   }
 
   function toggelUserStatus() {
-    firebase.auth().onAuthStateChanged(function(user) {
+    auth.onAuthStateChanged(function(user) {
       if (user) {
         userStatus = true;
-        btnLoginText = "Sign out";
         welcomeMessage = "Welcome, " + user.email.split("@")[0];
       } else {
         userStatus = false;
-        btnLoginText = "Login";
-        welcomeMessage = "";
       }
     });
   }
@@ -59,12 +55,29 @@
   </button>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
-      <li class="nav-item">
-        <span id="login" class="nav-link" on:click={showFormLogin}>
-          {btnLoginText}
-        </span>
-      </li>
+      {#if !userStatus}
+        <li
+          class="nav-item"
+          in:fly={{ x: 30 }}
+          out:fly={{ x: -30, duration: 100 }}>
+          <span id="login" class="nav-link" on:click={toggleSignIn}>Login</span>
+        </li>
+      {:else}
+        <li
+          class="nav-text mr-2"
+          in:fly={{ x: 30 }}
+          out:fly={{ x: -30, duration: 100 }}>
+          <span class="navbar-text font-italic">{welcomeMessage}</span>
+        </li>
+        <li
+          class="nav-item"
+          in:fly={{ x: 30 }}
+          out:fly={{ x: -30, duration: 100 }}>
+          <span id="login" class="nav-link" on:click={toggleSignIn}>
+            Sign out
+          </span>
+        </li>
+      {/if}
     </ul>
   </div>
-  <span class="navbar-text font-italic">{welcomeMessage}</span>
 </nav>

@@ -1,11 +1,12 @@
 <script>
-  import firebase from "firebase/app";
-  import "firebase/auth";
+  import { auth } from "./firebase.js";
   import { createEventDispatcher } from "svelte";
+  import Loader from "../parts/loader.svelte";
+
+  let loader = false;
 
   const dispatch = createEventDispatcher();
 
-  export let fb;
   function showFormLogin() {
     let form = document.getElementById("login-form");
     form.hidden = !form.hidden;
@@ -14,12 +15,12 @@
   function login() {
     let email = document.getElementById("inputEmail").value;
     let password = document.getElementById("inputPassword").value;
-
-    fb.auth()
+    //show loader
+    loader = true;
+    auth
       .signInWithEmailAndPassword(email, password)
       .then(u => {
-        var user = firebase.auth().currentUser;
-        dispatch("userStatus", { user: true });
+        var user = auth.currentUser;
         showFormLogin();
       })
       .catch(function(error) {
@@ -27,7 +28,6 @@
         var errorCode = error.code;
         var errorMessage = error.message;
         // [START_EXCLUDE]
-        dispatch("userStatus", { user: false });
         if (errorCode === "auth/wrong-password") {
           alert("Wrong password.");
         } else {
@@ -35,6 +35,10 @@
         }
         console.log(error);
         // [END_EXCLUDE]
+      })
+      .finally(function() {
+        //hide loader
+        loader = false;
       });
   }
 
@@ -42,27 +46,26 @@
     // TODO: Replace login form with register
     let email = document.getElementById("inputEmail").value;
     let password = document.getElementById("inputPassword").value;
-    fb.auth()
-      .createUserWithEmailAndPassword(email, password)
-      .catch(function(error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // [START_EXCLUDE]
-        if (errorCode == "auth/weak-password") {
-          alert("The password is too weak.");
-        } else {
-          alert(errorMessage);
-        }
-        console.log(error);
-        // [END_EXCLUDE]
-      });
+
+    auth.createUserWithEmailAndPassword(email, password).catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      // [START_EXCLUDE]
+      if (errorCode == "auth/weak-password") {
+        alert("The password is too weak.");
+      } else {
+        alert(errorMessage);
+      }
+      console.log(error);
+      // [END_EXCLUDE]
+    });
   }
 </script>
 
 <style>
   .row {
-    z-index: 999;
+    z-index: 2;
     width: 100%;
     position: fixed;
   }
@@ -118,3 +121,7 @@
     </form>
   </div>
 </div>
+
+{#if loader}
+  <Loader />
+{/if}
