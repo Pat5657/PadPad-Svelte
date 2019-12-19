@@ -2,9 +2,21 @@
   import EditorJS from "@editorjs/editorjs";
   import Header from "@editorjs/header";
   import List from "@editorjs/list";
+  import { auth, db } from "./firebase.js";
 
   const editor = new EditorJS({
     holder: "editorjs",
+    data: {
+      blocks: [
+        {
+          type: "header",
+          data: {
+            text: "Editor.js",
+            level: 2
+          }
+        }
+      ]
+    },
     tools: {
       header: {
         class: Header,
@@ -36,8 +48,25 @@
         class: Marker,
         shortcut: "CMD+SHIFT+M"
       }
-    }
+    },
+    onReady: function() {}
   });
+
+  function saveEditor() {
+    let userId = auth.currentUser.uid;
+    editor
+      .save()
+      .then(outputData => {
+        db.ref("/users/" + userId + "/pads/0/")
+          .set(outputData)
+          .then(function() {
+            console.log("saved");
+          });
+      })
+      .catch(error => {
+        console.log("Saving failed: ", error);
+      });
+  }
 </script>
 
 <style>
@@ -62,6 +91,10 @@
         <h4>Tools</h4>
       </li>
     </ul>
+    <button type="button" class="btn btn-outline-dark" on:click={saveEditor}>
+      <span>Save</span>
+      <i class="material-icons">save</i>
+    </button>
   </nav>
   <!-- Load editor -->
   <div id="editorjs" />

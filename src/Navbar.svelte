@@ -6,6 +6,11 @@
   let userStatus;
   let welcomeMessage = "";
 
+  function togglePads() {
+    let pads = document.getElementById("pads-view");
+    pads.hidden = !pads.hidden;
+  }
+
   function toggleSignIn() {
     if (userStatus === true) {
       auth.signOut();
@@ -15,23 +20,18 @@
     }
   }
 
-  function toggelUserStatus() {
-    auth.onAuthStateChanged(function(user) {
-      if (user) {
-        userStatus = true;
-        welcomeMessage = "Welcome, " + user.email.split("@")[0];
-      } else {
-        userStatus = false;
-      }
-    });
+  function showFormRegister() {
+    let form = document.getElementById("register-form");
+    form.hidden = !form.hidden;
   }
 
-  onMount(() => {
-    toggelUserStatus();
-  });
-
-  afterUpdate(() => {
-    toggelUserStatus();
+  auth.onAuthStateChanged(function(user) {
+    if (user) {
+      userStatus = true;
+      welcomeMessage = "Welcome, " + user.email.split("@")[0];
+    } else {
+      userStatus = false;
+    }
   });
 </script>
 
@@ -44,7 +44,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <a class="navbar-brand" href="">PadPad</a>
   <button
-    class="navbar-toggler"
+    class="navbar-toggler border-0"
     type="button"
     data-toggle="collapse"
     data-target="#navbarNav"
@@ -62,6 +62,14 @@
           out:fly={{ x: -30, duration: 100 }}>
           <span id="login" class="nav-link" on:click={toggleSignIn}>Login</span>
         </li>
+        <li
+          class="nav-item"
+          in:fly={{ x: 30 }}
+          out:fly={{ x: -30, duration: 100 }}>
+          <span id="register" class="nav-link" on:click={showFormRegister}>
+            Register
+          </span>
+        </li>
       {:else}
         <li
           class="nav-text mr-2"
@@ -76,6 +84,15 @@
           <span id="login" class="nav-link" on:click={toggleSignIn}>
             Sign out
           </span>
+        </li>
+        <li
+          class="nav-item"
+          in:fly={{ x: 30 }}
+          out:fly={{ x: -30, duration: 100 }}
+          data-toggle="modal"
+          data-target="#gridSystemModal"
+          on:click={togglePads}>
+          <span id="pads" class="nav-link">Pads</span>
         </li>
       {/if}
     </ul>

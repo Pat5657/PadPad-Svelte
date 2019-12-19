@@ -6,11 +6,10 @@
   .loading {
     display: flex;
     justify-content: center;
-    margin-top: 5rem;
     z-index: 999;
     position: absolute;
     left: 50%;
-    top: 0;
+    bottom: 6rem;
     transform: translate(-50%);
   }
   .loading div {

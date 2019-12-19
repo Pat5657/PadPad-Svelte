@@ -2,8 +2,10 @@
   import { auth } from "./firebase.js";
   import { createEventDispatcher } from "svelte";
   import Loader from "../parts/loader.svelte";
+  // import ErrorHandler from "../parts/errorHandler.svelte";
 
   let loader = false;
+  // let alert;
 
   const dispatch = createEventDispatcher();
 
@@ -29,8 +31,13 @@
         var errorMessage = error.message;
         // [START_EXCLUDE]
         if (errorCode === "auth/wrong-password") {
+          // alert = { type: "warning", message: "Wrong password." };
           alert("Wrong password.");
         } else {
+          // alert = {
+          //   type: "warning",
+          //   message: error.code + ": " + error.message
+          // };
           alert(errorMessage);
         }
         console.log(error);
@@ -43,6 +50,8 @@
   }
 
   function showFormRegister() {
+    let form = document.getElementById("login-form");
+    form.hidden = !form.hidden;
     // TODO: Replace login form with register
     let email = document.getElementById("inputEmail").value;
     let password = document.getElementById("inputPassword").value;
@@ -107,12 +116,6 @@
         Sign in
       </button>
       <button
-        class="btn btn-lg btn-link btn-block"
-        type="button"
-        on:click={showFormRegister}>
-        Register
-      </button>
-      <button
         class="btn btn-lg btn-light btn-block"
         type="button"
         on:click={showFormLogin}>
@@ -125,3 +128,5 @@
 {#if loader}
   <Loader />
 {/if}
+
+<!-- <ErrorHandler {...alert} /> -->
