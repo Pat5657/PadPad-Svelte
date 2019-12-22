@@ -3,6 +3,7 @@
   import Header from "@editorjs/header";
   import List from "@editorjs/list";
   import { auth, db } from "./firebase.js";
+  import shortid from "shortid";
 
   const editor = new EditorJS({
     holder: "editorjs",
@@ -52,12 +53,16 @@
     onReady: function() {}
   });
 
-  function saveEditor() {
+  async function saveEditor() {
+    // Get uid
     let userId = auth.currentUser.uid;
+    // Get new Pad Id if not updateing
+    let padId = shortid.generate();
+    // Save data
     editor
       .save()
       .then(outputData => {
-        db.ref("/users/" + userId + "/pads/0/")
+        db.ref("/users/" + userId + "/pads/" + padId)
           .set(outputData)
           .then(function() {
             console.log("saved");
